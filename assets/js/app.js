@@ -3,7 +3,6 @@
     'use strict';
 
     const base = (window.KAYFORD && window.KAYFORD.base) || '';
-    let KayfordApi = null;
     const csrf = () => {
         const el = document.querySelector('meta[name="csrf-token"]');
         return el ? el.getAttribute('content') : '';
@@ -75,82 +74,5 @@
         }
     }
 
-    function closeModal(modal) {
-        if (!modal) return;
-        modal.hidden = true;
-        document.body.classList.remove('has-modal');
-    }
-
-    function initModals() {
-        document.querySelectorAll('[data-modal-open]').forEach((trigger) => {
-            trigger.addEventListener('click', () => {
-                const modal = document.getElementById(trigger.dataset.modalOpen);
-                if (!modal) return;
-                modal.hidden = false;
-                document.body.classList.add('has-modal');
-                modal.querySelector('button, input, textarea')?.focus();
-            });
-        });
-        document.querySelectorAll('[data-modal-close]').forEach((trigger) => {
-            trigger.addEventListener('click', () => closeModal(trigger.closest('.modal')));
-        });
-        document.addEventListener('keydown', (event) => {
-            if (event.key !== 'Escape') return;
-            document.querySelectorAll('.modal:not([hidden])').forEach(closeModal);
-        });
-    }
-
-    function initToasts() {
-        document.querySelectorAll('[data-toast]').forEach((el) => {
-            el.addEventListener('click', () => toast(el.dataset.toast));
-        });
-    }
-
-    function initChat() {
-        const root = document.querySelector('[data-chat-thread]');
-        const form = document.querySelector('[data-chat-form]');
-        const list = document.querySelector('[data-message-list]');
-        if (!root || !form || !list) return;
-        let lastId = Number(root.dataset.lastMessage || 0);
-        const render = (message) => {
-            if (list.querySelector(`[data-message-id="${message.id}"]`)) return;
-            list.querySelector('.chat-empty')?.remove();
-            const article = document.createElement('article');
-            article.className = 'message message--incoming';
-            article.dataset.messageId = message.id;
-            article.innerHTML = `<div class="message__body"></div><time></time>`;
-            article.querySelector('.message__body').textContent = message.body;
-            article.querySelector('time').textContent = new Date(message.created_at.replace(' ', 'T')).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            list.appendChild(article);
-            list.scrollTop = list.scrollHeight;
-            lastId = Math.max(lastId, Number(message.id));
-        };
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const textarea = form.querySelector('textarea');
-            const body = textarea.value.trim();
-            if (!body) return;
-            try {
-                await submit(form.querySelector('[data-submit]'), async () => {
-                    await post('/chat/send', { message: body });
-                    textarea.value = '';
-                    toast('Сообщение отправлено', 'success');
-                    window.location.reload();
-                });
-            } catch (error) {
-                textarea.focus();
-            }
-        });
-        window.setInterval(async () => {
-            try {
-                const data = await get('/chat/poll?since=' + lastId);
-                (data.messages || []).forEach(render);
-            } catch (error) { /* следующий цикл повторит запрос */ }
-        }, 10000);
-    }
-
-    initModals();
-    initToasts();
-    initChat();
     window.Kayford = { api, post, get, url, toast, csrf, submit };
 })();
