@@ -15,6 +15,9 @@
             <button type="button" class="btn btn--ghost btn--sm" data-editor-command="insertUnorderedList">• Список</button>
             <button type="button" class="btn btn--ghost btn--sm" data-editor-command="formatBlock" data-value="h3">Заголовок</button>
             <button type="button" class="btn btn--ghost btn--sm" data-editor-command="createLink" data-link="https://example.com">Ссылка</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-editor-command="insertImage">Изображение</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-editor-command="insertTable">Таблица</button>
+            <button type="button" class="btn btn--ghost btn--sm" data-editor-command="insertFormula">Формула</button>
         </div>
         <div class="grid-2">
             <div class="field">
